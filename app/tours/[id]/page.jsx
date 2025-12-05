@@ -1,7 +1,8 @@
 // app/tours/[id]/page.jsx (server component)
 import React from "react";
-import VRViewer from "@/components/VRViewer";
-import RoomSidebar from "@/components/RoomSidebar";
+
+import VRViewer from "@/app/components/VRViewer";
+import RoomSidebar from "@/app/components/RoomSidebar";
 
 export default async function TourPage({ params }) {
   const id = await params?.id; // Next.js requires awaiting params in app router dynamic routes
