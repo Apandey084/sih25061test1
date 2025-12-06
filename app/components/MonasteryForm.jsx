@@ -197,7 +197,6 @@
 //     </form>
 //   );
 // }
-
 // app/components/MonasteryForm.jsx
 "use client";
 
@@ -219,16 +218,17 @@ export default function MonasteryForm({ existing = null, onSaved = null }) {
   const createdUrls = useRef(new Set());
 
   useEffect(() => {
-    // cleanup object URLs on unmount — snapshot the set so cleanup uses a stable copy
+    // Snapshot the current set at effect creation so cleanup uses a stable reference.
+    const urlsSnapshot = Array.from(createdUrls.current);
+
     return () => {
-      // make a copy of the URLs (stable snapshot)
-      const urls = Array.from(createdUrls.current);
-      urls.forEach((u) => {
+      // cleanup uses the snapshot so it won't be affected by ref mutations after mount
+      urlsSnapshot.forEach((u) => {
         try {
           if (u) URL.revokeObjectURL(u);
         } catch (e) {}
       });
-      // clear the original Set
+      // also clear the live set to be safe
       try {
         createdUrls.current.clear();
       } catch (e) {}
@@ -312,7 +312,7 @@ export default function MonasteryForm({ existing = null, onSaved = null }) {
       fd.append("description", description || "");
 
       // If editing, include id so server PUT can accept either id in payload or query param
-      if (existing?. _id) fd.append("id", existing._id);
+      if (existing?._id) fd.append("id", existing._id);
 
       // Primary file (optional); field name "image"
       if (primaryFile) fd.append("image", primaryFile);
@@ -321,7 +321,7 @@ export default function MonasteryForm({ existing = null, onSaved = null }) {
       imagesFiles.forEach((f) => fd.append("images", f));
 
       // Decide endpoint + method: if editing (existing._id) use PUT and include ?id= or include id in body
-      const url = existing? `/api/monasteries?id=${existing._id}` : "/api/monasteries";
+      const url = existing ? `/api/monasteries?id=${existing._id}` : "/api/monasteries";
       const method = existing ? "PUT" : "POST";
 
       const res = await fetch(url, {
@@ -342,7 +342,7 @@ export default function MonasteryForm({ existing = null, onSaved = null }) {
       if (typeof onSaved === "function") onSaved(data.monastery || data);
       // reset fields if it was a create
       if (!existing) {
-        // revoke created object urls for previews (we will clear them)
+        // revoke created object urls for previews (snapshot before clearing)
         const urls = Array.from(createdUrls.current);
         urls.forEach((u) => {
           try {
