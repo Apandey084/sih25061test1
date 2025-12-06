@@ -5,7 +5,7 @@
 // export default function Home() {
 //   return (
 //     <>
-      
+
 
 
 //         <div className="banner   bg-[url('https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQvyi-BAHLi81eoRnunKtIr2blmIbBS7R1pDw&s')] h-[500px] w-[80vw]  container mx-auto bg-no-repeat bg-cover  z-[-1]   border border-amber-50 flex flex-col gap-4 py-[40px] rounded-[10px] ">
@@ -70,12 +70,11 @@
 
 
 
-    
+
 
 //     </>
 //   );
 // }
-
 "use client"
 import Explorefeature from "./components/ExploreFeature";
 import Featuredmonastery from "./components/featuredmonastery";
@@ -100,7 +99,7 @@ export default function Home() {
 
           <div className="relative z-10 px-4 w-full">
             <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-extrabold text-white leading-tight max-w-4xl mx-auto">
-              Discover Sikkim's Sacred Heritage
+              Discover Sikkim&apos;s Sacred Heritage
             </h1>
 
             <p className="mt-4 text-sm sm:text-base text-gray-100 max-w-3xl mx-auto px-2">
@@ -108,7 +107,7 @@ export default function Home() {
             </p>
 
             <div className="mt-6 flex justify-center">
-             <Link href='/viewer'> <button
+              <Link href='/viewer'> <button
                 type="button"
                 className="inline-flex items-center px-4 py-2 rounded-lg text-sm sm:text-base font-medium
                   bg-gradient-to-r from-purple-500 to-pink-500 hover:opacity-95 focus:outline-none focus:ring-2 focus:ring-purple-300"
@@ -177,10 +176,10 @@ export default function Home() {
                 Join us for traditional rituals, cultural performances, and guided monastery tours.
               </p>
               <div className="mt-2 flex gap-3">
-               <Link href='/events'> <button className="px-4 py-2 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm">
+                <Link href='/events'> <button className="px-4 py-2 rounded-md bg-gradient-to-r from-purple-500 to-pink-500 text-white text-sm">
                   Click me
                 </button></Link>
-               
+
               </div>
             </div>
           </div>

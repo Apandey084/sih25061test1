@@ -1,7 +1,7 @@
 // app/viewer/RoomScene.jsx
 "use client";
 
-import React, { useRef, useMemo } from "react";
+import React, { useRef, useMemo, Suspense } from "react";
 import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { OrbitControls, PerspectiveCamera, Html } from "@react-three/drei";
 import * as THREE from "three";
@@ -18,7 +18,7 @@ function Panorama({ imageUrl, autoRotateSpeed = 0.001 }) {
 
   useFrame((state, delta) => {
     if (meshRef.current) {
-      meshRef.current.rotation.y += autoRotateSpeed * delta * 60; // scaled rotation
+      meshRef.current.rotation.y += autoRotateSpeed * delta * 60;
     }
   });
 
@@ -35,7 +35,6 @@ function Panorama({ imageUrl, autoRotateSpeed = 0.001 }) {
 }
 
 export default function RoomScene({ room }) {
-  // small fallback if no room
   if (!room) {
     return (
       <div className="h-full w-full flex items-center justify-center text-sm text-gray-500">

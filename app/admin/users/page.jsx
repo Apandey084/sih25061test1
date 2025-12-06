@@ -21,7 +21,7 @@ export default function AdminUsersPage() {
 
   useEffect(() => {
     fetchUsers();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, []);
 
   // Robust fetch: accept either [] or { users: [], total, ... }
