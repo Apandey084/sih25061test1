@@ -156,13 +156,11 @@
 //     </div>
 //   );
 // }
-
 // app/admin/signin/page.jsx
-import dynamic from "next/dynamic";
-import React from "react";
+"use client";
 
-// Dynamically import client component with SSR disabled so build/prerender won't execute client-only hooks.
-const ClientSignIn = dynamic(() => import("./ClientSignIn"), { ssr: false });
+import React from "react";
+import ClientSignIn from "./ClientSignIn";
 
 export default function AdminSignInPage() {
   return <ClientSignIn />;
