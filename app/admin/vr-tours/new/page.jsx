@@ -113,10 +113,10 @@ export default function NewVRTourPage() {
         {/* Monastery dropdown */}
         <div>
           <label className="block text-gray-700">Select Monastery</label>
-          <select
+          <select 
             value={selectedMonastery}
             onChange={(e) => setSelectedMonastery(e.target.value)}
-            className="w-full border p-2 rounded mt-1"
+            className="w-full border p-2 rounded mt-1 bg-black text-white"
             required
           >
             <option value="">-- Choose Monastery --</option>
