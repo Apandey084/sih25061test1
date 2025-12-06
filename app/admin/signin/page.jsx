@@ -157,12 +157,17 @@
 //   );
 // }
 
+// // app/admin/signin/page.jsx
+// "use client";
+
+// import React from "react";
+// import ClientSignIn from "./ClientSignIn";
+
+// export default function AdminSignInPage() {
+//   return <ClientSignIn />;
+// }
+
 // app/admin/signin/page.jsx
 "use client";
+export { default } from "./ClientSignIn";
 
-import React from "react";
-import ClientSignIn from "./ClientSignIn";
-
-export default function AdminSignInPage() {
-  return <ClientSignIn />;
-}
