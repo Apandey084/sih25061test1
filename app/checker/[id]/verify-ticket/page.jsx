@@ -149,10 +149,9 @@
 //     </div>
 //   );
 // }
-
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useParams } from "next/navigation";
 import { signIn, useSession } from "next-auth/react";
@@ -168,30 +167,33 @@ export default function CheckerVerifyPage() {
   const [lastScanned, setLastScanned] = useState(null); // raw scanned string
   const scannerRef = useRef(null);
 
-  function extractObjectIdFromString(s) {
+  // simple helper — deterministic, no external deps
+  const extractObjectIdFromString = useCallback((s) => {
     if (!s) return null;
     const m = String(s).match(/[a-fA-F0-9]{24}/);
     return m ? m[0] : null;
-  }
+  }, []);
 
-  async function callVerifyApiWithPayload(scanned) {
+  const callVerifyApiWithPayload = useCallback(async (scanned) => {
     setError(null);
     setResult(null);
+
     try {
       const trimmed = String(scanned).trim();
       const possibleId = extractObjectIdFromString(trimmed);
 
       // If we found an ObjectId anywhere, prefer sending ticketId
       const body = possibleId ? { ticketId: possibleId } : { qrData: trimmed };
-      console.log("Sending verify body:", body);
+      // console.log("Sending verify body:", body);
 
       const res = await fetch("/api/verify-ticket", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
+
       const data = await res.json().catch(() => ({}));
-      console.log("verify response:", res.status, data);
+      // console.log("verify response:", res.status, data);
 
       if (!res.ok) {
         setError(data.error || `Server error: ${res.status}`);
@@ -230,34 +232,60 @@ export default function CheckerVerifyPage() {
       console.error("verify error:", err);
       setError(err?.message || "Verification failed");
     } finally {
+      // stop scanning UI after verification attempt
       setScanning(false);
     }
-  }
+  }, [extractObjectIdFromString]);
 
   useEffect(() => {
     if (!scanning) return;
     if (typeof window === "undefined") return;
 
+    // Create scanner
     const scanner = new Html5QrcodeScanner("qr-reader", {
       fps: 10,
       qrbox: { width: 250, height: 250 },
       rememberLastUsedCamera: true,
     });
 
-    scanner.render(
-      (decodedText) => {
-        try { scanner.clear(); } catch (e) {}
-        setLastScanned(decodedText);
-        callVerifyApiWithPayload(decodedText);
-      },
-      (err) => {
-        console.warn("scan error:", err);
+    // on success
+    const onDecode = (decodedText) => {
+      try {
+        // stop scanner immediately to avoid multiple rapid calls
+        scanner.clear().catch(() => {});
+      } catch (e) {
+        // ignore
       }
-    );
+      setLastScanned(decodedText);
+      callVerifyApiWithPayload(decodedText);
+    };
+
+    // on error
+    const onError = (err) => {
+      console.warn("scan error:", err);
+    };
+
+    try {
+      scanner.render(onDecode, onError);
+    } catch (e) {
+      console.error("Failed to start scanner:", e);
+      setError("Failed to start scanner");
+      setScanning(false);
+    }
 
     scannerRef.current = scanner;
-    return () => { scanner.clear().catch(() => {}); };
-  }, [scanning]);
+
+    // cleanup
+    return () => {
+      try {
+        scanner.clear().catch(() => {});
+      } catch (e) {
+        // ignore
+      }
+      // clear ref
+      if (scannerRef.current === scanner) scannerRef.current = null;
+    };
+  }, [scanning, callVerifyApiWithPayload]); // <--- include the callback in deps
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-start p-6 bg-gray-900 text-white">

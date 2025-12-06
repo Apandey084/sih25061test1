@@ -198,7 +198,6 @@
 //   );
 // }
 
-
 // app/components/MonasteryForm.jsx
 "use client";
 
@@ -220,14 +219,19 @@ export default function MonasteryForm({ existing = null, onSaved = null }) {
   const createdUrls = useRef(new Set());
 
   useEffect(() => {
-    // cleanup object URLs on unmount (only references createdUrls ref — no lint deps)
+    // cleanup object URLs on unmount — snapshot the set so cleanup uses a stable copy
     return () => {
-      createdUrls.current.forEach((u) => {
+      // make a copy of the URLs (stable snapshot)
+      const urls = Array.from(createdUrls.current);
+      urls.forEach((u) => {
         try {
           if (u) URL.revokeObjectURL(u);
         } catch (e) {}
       });
-      createdUrls.current.clear();
+      // clear the original Set
+      try {
+        createdUrls.current.clear();
+      } catch (e) {}
     };
   }, []);
 
@@ -339,7 +343,8 @@ export default function MonasteryForm({ existing = null, onSaved = null }) {
       // reset fields if it was a create
       if (!existing) {
         // revoke created object urls for previews (we will clear them)
-        createdUrls.current.forEach((u) => {
+        const urls = Array.from(createdUrls.current);
+        urls.forEach((u) => {
           try {
             if (u) URL.revokeObjectURL(u);
           } catch (e) {}

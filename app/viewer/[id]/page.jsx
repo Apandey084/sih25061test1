@@ -432,7 +432,6 @@
 //     </mesh>
 //   );
 // }
-
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { Canvas, useFrame, useLoader } from "@react-three/fiber";
@@ -478,7 +477,6 @@ export default function ViewerPage() {
         }
 
         // Defer setTour to avoid synchronous setState within effect which can cause cascading renders.
-        // We still respect component mount state and clear timer on cleanup.
         pendingSetTimer = setTimeout(() => {
           if (!mounted) return;
           setTour(resolved);
@@ -532,7 +530,9 @@ export default function ViewerPage() {
           console.log("Audio autoplay blocked or failed to play");
         });
     } else {
-      setIsPlaying(false);
+      // Avoid calling setState synchronously inside effect (ESLint rule).
+      // Schedule update to next microtask so effect finishes before state update.
+      Promise.resolve().then(() => setIsPlaying(false));
     }
 
     // cleanup on unmount / room change

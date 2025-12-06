@@ -304,22 +304,12 @@
 //     </div>
 //   );
 // }
-
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import AdminSidebar from "@/app/components/AdminSidebar";
 import AdminNavbar from "@/app/components/AdminNavbar";
-
-/**
- * Admin Dashboard (client-side)
- *
- * - Fetches stats from: /api/monasteries, /api/users, /api/tickets
- * - Fetches recent lists from the same endpoints (last few items)
- * - Renders a bar chart (tickets by month) and a donut chart for quick breakdown
- * - Uses your requested background and is responsive
- */
 
 /* ----------------------------- helpers & SVG charts ---------------------------- */
 
@@ -328,17 +318,28 @@ function formatNumber(n) {
   return n.toLocaleString?.() ?? String(n);
 }
 
-/* Simple BarChart component (responsive) */
+/* Simple BarChart component (responsive) - memoizes layout to avoid reassigning variables during render */
 function BarChart({ labels = [], values = [], height = 160 }) {
-  const max = Math.max(...values, 1);
-  const pad = 12;
-  const barGap = 8;
-  const bars = values.length;
-  const barWidth = bars ? Math.max(12, Math.floor((600 - pad * 2 - barGap * (bars - 1)) / bars)) : 12;
-  const svgWidth = Math.min(900, bars * (barWidth + barGap) + pad * 2);
+  const layout = useMemo(() => {
+    const max = Math.max(...values, 1);
+    const pad = 12;
+    const barGap = 8;
+    const bars = values.length;
+    const barWidth = bars ? Math.max(12, Math.floor((600 - pad * 2 - barGap * (bars - 1)) / bars)) : 12;
+    const svgWidth = Math.min(900, bars * (barWidth + barGap) + pad * 2);
+
+    const items = values.map((v, i) => {
+      const x = pad + i * (barWidth + barGap);
+      const h = Math.round((v / max) * (height - 40));
+      const y = height - h - 20;
+      return { x, y, h, barWidth, i };
+    });
+
+    return { svgWidth, items };
+  }, [labels, values, height]);
 
   return (
-    <svg viewBox={`0 0 ${svgWidth} ${height}`} width="100%" height={height} xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox={`0 0 ${layout.svgWidth} ${height}`} width="100%" height={height} xmlns="http://www.w3.org/2000/svg">
       <defs>
         <linearGradient id="barGrad" x1="0" x2="1">
           <stop offset="0%" stopColor="#7c3aed" />
@@ -346,37 +347,35 @@ function BarChart({ labels = [], values = [], height = 160 }) {
         </linearGradient>
       </defs>
 
-      {values.map((v, i) => {
-        const x = pad + i * (barWidth + barGap);
-        const h = Math.round((v / max) * (height - 40));
-        const y = height - h - 20;
-        return (
-          <g key={i}>
-            <rect x={x} y={y} width={barWidth} height={h} rx="6" fill="url(#barGrad)" />
-            <text x={x + barWidth / 2} y={height - 4} fontSize="10" fill="#94a3b8" textAnchor="middle">
-              {labels[i]}
-            </text>
-          </g>
-        );
-      })}
+      {layout.items.map((it) => (
+        <g key={it.i}>
+          <rect x={it.x} y={it.y} width={it.barWidth} height={it.h} rx="6" fill="url(#barGrad)" />
+          <text x={it.x + it.barWidth / 2} y={height - 4} fontSize="10" fill="#94a3b8" textAnchor="middle">
+            {labels[it.i]}
+          </text>
+        </g>
+      ))}
     </svg>
   );
 }
 
-/* Simple Donut Chart (fixed - no outer mutation) */
+/* Simple Donut Chart (no mutation during render) */
 function Donut({ parts = [], size = 120 }) {
-  // Compute total and per-part start/end using useMemo to avoid mutating outer scope during render
   const computed = useMemo(() => {
     const total = parts.reduce((s, p) => s + (p.value || 0), 0) || 1;
     const center = size / 2;
     const radius = size / 2 - 6;
 
-    let accum = 0;
-    const list = parts.map((p) => {
-      const value = p.value || 0;
-      const start = (accum / total) * Math.PI * 2;
-      accum += value;
-      const end = (accum / total) * Math.PI * 2;
+    // Build cumulative sums array without mutating outer-scope variables during render
+    const cums = parts.reduce((acc, p) => {
+      const last = acc.length ? acc[acc.length - 1] : 0;
+      acc.push(last + (p.value || 0));
+      return acc;
+    }, []);
+
+    const list = parts.map((p, i) => {
+      const start = i === 0 ? 0 : (cums[i - 1] / total) * Math.PI * 2;
+      const end = ((cums[i] || 0) / total) * Math.PI * 2;
       const large = end - start > Math.PI ? 1 : 0;
       const x1 = center + radius * Math.cos(start - Math.PI / 2);
       const y1 = center + radius * Math.sin(start - Math.PI / 2);
@@ -394,7 +393,9 @@ function Donut({ parts = [], size = 120 }) {
 
   return (
     <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="mx-auto">
-      {computed.list.map((p, idx) => <path key={idx} d={p.d} fill={p.color || "#7c3aed"} />)}
+      {computed.list.map((p, idx) => (
+        <path key={idx} d={p.d} fill={p.color || "#7c3aed"} />
+      ))}
       <circle cx={computed.center} cy={computed.center} r={computed.radius - 16} fill="#0b1220" />
     </svg>
   );
@@ -427,6 +428,7 @@ export default function AdminDashboardPage() {
 
   useEffect(() => {
     fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function fetchData() {
