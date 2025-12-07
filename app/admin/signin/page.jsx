@@ -166,27 +166,25 @@
 // export default function AdminSignInPage() {
 //   return <ClientSignIn />;
 // }
-
 // app/admin/signin/page.jsx
 import React from "react";
 import dynamic from "next/dynamic";
 
-// Prevent static prerendering
 export const dynamic = "force-dynamic";
 
-// Dynamically import the client component (better for bundling)
+// Use suspense: true (NOT ssr: false) inside a server component
 const ClientSignIn = dynamic(() => import("./ClientSignIn"), {
-  ssr: false, // ensures this component is only rendered on the client
+  suspense: true,
 });
 
 export default function Page() {
   return (
-    // Suspense here silences the missing-suspense-with-csr-bailout error
-    <React.Suspense fallback={<div style={{minHeight: "100vh"}} />}>
+    <React.Suspense fallback={<div style={{ minHeight: "100vh" }} />}>
       <ClientSignIn />
     </React.Suspense>
   );
 }
+
 
 
 
