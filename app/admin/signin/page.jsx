@@ -166,8 +166,17 @@
 // export default function AdminSignInPage() {
 //   return <ClientSignIn />;
 // }
-
 // app/admin/signin/page.jsx
 "use client";
-export { default } from "./ClientSignIn";
+
+import React from "react";
+import ClientSignIn from "./ClientSignIn";
+
+// Prevent Next from trying to statically prerender this page
+export const dynamic = "force-dynamic";
+
+export default function Page() {
+  return <ClientSignIn />;
+}
+
 
