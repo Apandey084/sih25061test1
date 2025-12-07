@@ -143,8 +143,8 @@ export default function ClientSignIn() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-6 bg-slate-50">
-      <div className="w-full max-w-md p-6 rounded shadow bg-white">
+    <div className="min-h-screen flex items-center justify-center p-6 bg-black text-white">
+      <div className="w-full max-w-md p-6 rounded shadow ">
         <h2 className="text-xl font-semibold mb-4">Admin Sign In</h2>
         <form onSubmit={handleSubmit} className="flex flex-col gap-3">
           <input
