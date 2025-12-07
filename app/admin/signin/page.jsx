@@ -168,16 +168,25 @@
 // }
 
 // app/admin/signin/page.jsx
-"use client";
-
 import React from "react";
-import ClientSignIn from "./ClientSignIn";
+import dynamic from "next/dynamic";
 
-// Prevent Next from attempting to prerender this route at build time
+// Prevent static prerendering
 export const dynamic = "force-dynamic";
 
+// Dynamically import the client component (better for bundling)
+const ClientSignIn = dynamic(() => import("./ClientSignIn"), {
+  ssr: false, // ensures this component is only rendered on the client
+});
+
 export default function Page() {
-  return <ClientSignIn />;
+  return (
+    // Suspense here silences the missing-suspense-with-csr-bailout error
+    <React.Suspense fallback={<div style={{minHeight: "100vh"}} />}>
+      <ClientSignIn />
+    </React.Suspense>
+  );
 }
+
 
 

@@ -82,6 +82,17 @@
 //   );
 // }
 
+// // app/admin/signin/ClientSignIn.jsx
+// "use client";
+
+// import React, { useState } from "react";
+// import { signIn } from "next-auth/react";
+// import { useSearchParams, useRouter } from "next/navigation";
+
+// export default function ClientSignIn() {
+//   const search = useSearchParams();
+//   const router = useRouter();
+//   const from = search?.get("from") ?? "/admin/dashboard";
 // app/admin/signin/ClientSignIn.jsx
 "use client";
 
@@ -93,6 +104,9 @@ export default function ClientSignIn() {
   const search = useSearchParams();
   const router = useRouter();
   const from = search?.get("from") ?? "/admin/dashboard";
+  // ...rest unchanged
+
+
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
