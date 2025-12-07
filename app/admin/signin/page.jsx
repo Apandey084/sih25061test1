@@ -166,13 +166,14 @@
 // export default function AdminSignInPage() {
 //   return <ClientSignIn />;
 // }
+
 // app/admin/signin/page.jsx
 "use client";
 
 import React from "react";
 import ClientSignIn from "./ClientSignIn";
 
-// Prevent Next from trying to statically prerender this page
+// Prevent Next from attempting to prerender this route at build time
 export const dynamic = "force-dynamic";
 
 export default function Page() {
