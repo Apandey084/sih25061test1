@@ -166,14 +166,15 @@
 // export default function AdminSignInPage() {
 //   return <ClientSignIn />;
 // }
+
 // app/admin/signin/page.jsx
 import React from "react";
-import dynamic from "next/dynamic";
+import nextDynamic from "next/dynamic"; // alias to avoid name collision
 
 export const dynamic = "force-dynamic";
 
 // Use suspense: true (NOT ssr: false) inside a server component
-const ClientSignIn = dynamic(() => import("./ClientSignIn"), {
+const ClientSignIn = nextDynamic(() => import("./ClientSignIn"), {
   suspense: true,
 });
 
@@ -184,7 +185,3 @@ export default function Page() {
     </React.Suspense>
   );
 }
-
-
-
-
